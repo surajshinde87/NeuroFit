@@ -5,8 +5,6 @@ import com.fiteness.activityservice.dto.ActivityResponse;
 import com.fiteness.activityservice.model.Activity;
 import com.fiteness.activityservice.repository.ActivityRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -14,15 +12,15 @@ import org.springframework.stereotype.Service;
 public class ActivityService {
 
     private  final ActivityRepository activityRepository;
-
-    @Autowired
-    private MongoTemplate mongoTemplate;
-
-    public void debugDb() {
-        System.out.println("Connected DB: " + mongoTemplate.getDb().getName());
-    }
+    private final UserValidationService userValidationService;
 
     public ActivityResponse trackActivity(ActivityRequest request) {
+
+        boolean isValidUser = userValidationService.validateUser(request.getUserId());
+
+        if (!isValidUser){
+            throw new RuntimeException("Invalid User: " + request.getUserId());
+        }
 
         Activity activity = Activity.builder()
                 .userId(request.getUserId())
