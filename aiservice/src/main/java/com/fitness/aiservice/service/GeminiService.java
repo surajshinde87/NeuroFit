@@ -23,7 +23,8 @@ public class GeminiService {
         this.webClient = webClientBuilder.build();
     }
 
-    public String getRecommendations(String details){
+    public String getRecommendations(String details) {
+
         Map<String, Object> requestBody = Map.of(
                 "contents", new Object[]{
                         Map.of(
@@ -33,16 +34,25 @@ public class GeminiService {
                         )
                 }
         );
-        String response = webClient.post()
-                .uri(geminiApiUrl)
-                .header("Content-Type","application/json")
-                .header("x-goog-api-key", getGeminiApiKey)
-                .bodyValue(requestBody)
-                .retrieve()
-                .bodyToMono(String.class)
-                .block();
 
-        return response;
+        try {
+
+            return webClient.post()
+                    .uri(geminiApiUrl)
+                    .header("Content-Type", "application/json")
+                    .header("x-goog-api-key", getGeminiApiKey)
+                    .bodyValue(requestBody)
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .block();
+
+        } catch (org.springframework.web.reactive.function.client.WebClientResponseException e) {
+
+            System.out.println("STATUS = " + e.getStatusCode());
+            System.out.println("BODY = " + e.getResponseBodyAsString());
+
+            throw e;
+        }
     }
 
 }
